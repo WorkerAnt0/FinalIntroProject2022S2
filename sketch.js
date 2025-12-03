@@ -169,7 +169,6 @@ loadSprite("Laser", "Sprites/laser.png");
 loadSprite("Bomb", "Sprites/bomb.png");
 loadSprite("SpaceBackGround", "Sprites/SpaceBackGround.jpg");
 loadSprite("RedSpace", "Sprites/RedSpace.png");
-loadSprite("Glitch", "glitch.png");
 
 //Fonts
 loadFont("GOR", "Fonts/god-of-war.ttf", 6, 8);
