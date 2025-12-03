@@ -20,17 +20,6 @@ loadSprite("Space ship", "ship5-Sheet.png", {
     },
   },
 });
-loadSprite("Communication", "AlienCom1.png", {
-  sliceX: 3,
-  sliceY: 0,
-  anims: {
-    run: {
-      from: 0,
-      to: 100,
-      speed: 10,
-    },
-  },
-});
 loadSprite("Fireball", "Fireball-Sheet.png", {
   sliceX: 27,
   sliceY: 0,
@@ -245,12 +234,6 @@ onLoad(() => {
       pos(width() / 100, height() / 1.7),
       z(2),
     ]);
-	  add([
-      sprite("Communication", { anim: "run" }),
-      scale(3.5),
-      opacity(0.98),
-      pos(width() / 100, height() / 1.7),
-    ]);
     add([
       text("Space Invaders", {
         font: "KH",
@@ -344,12 +327,6 @@ onLoad(() => {
         });
       }
     });
-	add([
-      sprite("textbox", { anim: "run" }),
-      scale(1.5),
-      pos(width() / 2.4, height() / 1500),
-      z(2),
-    ]);
     /*
     //Dialogue
     add([
@@ -357,6 +334,12 @@ onLoad(() => {
       scale(15),
       pos(width() / 2.2, height() / 20),
       z(3),
+    ]);
+    add([
+      sprite("textbox", { anim: "run" }),
+      scale(1.5),
+      pos(width() / 2.4, height() / 1500),
+      z(2),
     ]);
     onDraw(() => {
       add([
