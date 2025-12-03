@@ -1,4 +1,3 @@
-//Canvas
 kaboom({
   background: [0, 0, 0],
   width: 1500,
@@ -100,11 +99,6 @@ loadSprite("characters","SpriteSheets/SpaceShooterAssetPack_Characters (1).png",
     sliceX: 5,
     sliceY: 10.99,
     anims: {
-      glitch: {
-        from: 50,
-        to: 53,
-        speed: 7,
-      },
       allycom: {
         from: 10,
         to: 14,
@@ -186,8 +180,9 @@ loadSound("Buttonsound", "Soundeffects/Buttonsound.wav");
 onLoad(() => {
   let MCanbeHeard = add([{ value: 2 }]);
   let SCanbeHeard = add([{ value: 2 }]);
-  let Difficultymode = add([{ value: 1 }]);
-
+  let Difficultymode = add([{ value: 2 }]);
+  let Wavenum = 0
+  
   let menumusic = play("menumusic", {
     volume: 0.7,
     loop: true,
@@ -275,7 +270,7 @@ onLoad(() => {
     onClick("NewGame", () => {
       go("game");
     });
-    const continuebtn = add([
+   /* const continuebtn = add([
       "Button",
       "continue",
       text("Continue", {
@@ -297,8 +292,10 @@ onLoad(() => {
       }
     });
     onClick("continue", () => {
+      Wavenum = localStorage.getItem("level") || 0
       go("game");
     });
+    */
     const settingsbtn = add([
       "SettingsButton",
       "Button",
@@ -326,7 +323,7 @@ onLoad(() => {
     onClick("Button", () => {
       if (SCanbeHeard.value % 2 == 0) {
         play("Buttonsound", {
-          volume: 0.4,
+          volume: 1,
         });
       }
     });
@@ -414,12 +411,13 @@ onLoad(() => {
       pos(width() / 2.5, height() / 5),
       area(),
       z(2),
+      "Button",
     ]);
     onClick("SFX", () => {
       SCanbeHeard.value += 5;
       if (SCanbeHeard.value % 2 == 1) {
         play("Buttonsound", {
-          volume: 0.4,
+          volume: 1,
         });
       }
     });
@@ -441,6 +439,7 @@ onLoad(() => {
       }),
       pos(width() / 3, height() / 3.3),
       area(),
+      "Button",
       z(2),
     ]);
     Musicbtn.onUpdate(() => {
@@ -491,6 +490,7 @@ onLoad(() => {
       pos(width() / 8, height() / 2),
       area(),
       z(2),
+      "Button",
     ]);
     difficultybtn.onUpdate(() => {
       if (difficultybtn.isHovering()) {
@@ -516,7 +516,7 @@ onLoad(() => {
   ${SCanbeHeard.value % 2 == 0 ? "SFX: ON" : "SFX: OFF"}
 `.trim();
       difficultybtn.text = `
-  ${Difficultymode.value % 1.5 == 1 ? "Difficulty: Normal" : "Difficulty: Hard"}
+  ${Difficultymode.value % 2 == 0 ? "Difficulty: Normal" : "Difficulty: Hard"}
 `.trim();
     }
     onUpdate(updateText);
@@ -526,7 +526,7 @@ onLoad(() => {
     onClick("Button", () => {
       if (SCanbeHeard.value % 2 == 0) {
         play("Buttonsound", {
-          volume: 0.4,
+          volume: 1,
         });
       }
     });
@@ -610,7 +610,7 @@ onLoad(() => {
     onClick("Button", () => {
       if (SCanbeHeard.value % 2 == 0) {
         play("Buttonsound", {
-          volume: 0.4,
+          volume: 1,
         });
       }
     });
@@ -633,7 +633,7 @@ onLoad(() => {
     onClick("Button", () => {
       if (SCanbeHeard.value == 0) {
         play("Buttonsound", {
-          volume: 0.4,
+          volume: 1,
         });
       }
     });
@@ -645,7 +645,7 @@ onLoad(() => {
       }),
       "RetryButton",
       "Button",
-      pos(width() / 2, height() / 2),
+      pos(width() / 2.5, height() / 2),
       color(255, 215, 0),
       area(),
       z(2),
@@ -664,11 +664,43 @@ onLoad(() => {
     onClick("RetryButton", () => {
       go("game");
     });
+    const Menubtn = add([
+      "Menu",
+      text("Menu", {
+        font: "GOR",
+        size: 90,
+      }),
+      "Button",
+      pos(width() / 2.5, height() / 2.5),
+      area(),
+      z(2),
+    ]);
+    onClick("Menu", () => {
+      go("Menu");
+    });
+    Menubtn.onUpdate(() => {
+      if (Menubtn.isHovering()) {
+        Menubtn.color = rgb(104,173,105);
+        Menubtn.scale = vec2(1.2);
+        cursor("pointer");
+      } else {
+        Menubtn.scale = vec2(1);
+        Menubtn.color = rgb(104,173,105);
+      }
+    });
+    onClick("Button", () => {
+      if (SCanbeHeard.value % 2 == 0) {
+        play("Buttonsound", {
+          volume: 1,
+        });
+      }
+    });
   });
-  
+
 //Game
     //Battle music
    scene("game", () => {
+     Wavenum = localStorage.getItem("scene")
     if (MCanbeHeard.value % 2 == 0) {
       Losemusic.stop();
       Victorymusic.stop();
@@ -729,7 +761,7 @@ onLoad(() => {
       ]);
       if (SCanbeHeard.value % 2 == 0) {
         play("Explosion", {
-          volume: 0.7,
+          volume: 0.6,
         });
       }
       if (Hp.value == 5) {
@@ -764,7 +796,7 @@ onLoad(() => {
       onKeyPress("space", () => {
         if (SCanbeHeard.value % 2 == 0) {
           play("Shooting", {
-            volume: 0.15,
+            volume: 0.7,
           });
         }
         add([
@@ -816,14 +848,27 @@ onLoad(() => {
       { value: 0 },
       z(3),
     ]);
-    onUpdate(() => {
-      if (score.value == 550) {
-        go("Win");
-      }
-    });
-  //Aliens
+  //Aliens 
+     if(Difficultymode.value % 2 == 0)
      onUpdate("alien", (a) => {
       if (Math.random() < 0.002) {
+        const bPos = a.pos.add(0, a.height / 2);
+        add([
+          color(189, 183, 107),
+          "bomb",
+          pos(bPos),
+          sprite("Bomb"),
+          scale(1.5, 1),
+          area(),
+          move(DOWN, 525),
+          cleanup(),
+          z(2),
+        ]);
+      }
+    });
+   else if(Difficultymode.value % 2 == 1)
+     onUpdate("alien", (a) => {
+      if (Math.random() < 0.003) {
         const bPos = a.pos.add(0, a.height / 2);
         add([
           color(189, 183, 107),
@@ -882,13 +927,23 @@ onLoad(() => {
       pos(width() + 10, 0),
     ]);
 
+     if(Difficultymode.value % 2 == 0 ) {
     const aliens = [];
   for (let i = 0; i < 18; i++) {
     for (let j = 0; j < 3; j++) {
       aliens.push(createAlien(i * 75, j * 75));
       }
     }
-    
+     }
+     else if (Difficultymode.value % 2 == 1 ) {
+    const aliens = [];
+  for (let i = 0; i < 18; i++) {
+    for (let j = 0; j < 4; j++) {
+      aliens.push(createAlien(i * 75, j * 75));
+      }
+    }
+     }
+     
     var dir = 3;
     var didLeft = true;
     var y = 10;
@@ -911,9 +966,275 @@ onLoad(() => {
         didLeft = false;
       }
     });
-    
-  //Alien waves if ()
-  
+     onUpdate(() => {
+      if (score.value == 270) {
+        go("Boss");
+      }
+    });
   }); //Closing game
+  
+//Boss
+     scene("Boss", () => {
+       Wavenum ++
+       localStorage.setItem("scene",Wavenum)
+           if (MCanbeHeard.value % 2 == 0) {
+      Losemusic.stop();
+      Victorymusic.stop();
+      menumusic.stop();
+    }
+    wait(0.5, () => {
+      if (Gamemusic.isStopped() && MCanbeHeard.value % 2 == 0) {
+        Gamemusic.play();
+      }
+    });
+    //Background
+    add([sprite("SpaceBackGround"), scale(0.5), z(1)]);
+    const Hearts = add([
+    sprite("Hearts"),
+    pos(width() / 1500, height() / 1.1),
+    scale(6),
+    z(2),
+    ]);
+    cursor("default");
+  //Player ship
+    const player = add([
+      sprite("Space ship"), 
+      scale(0.2, 0.2),
+      pos(width() / 2, height() - 50), 
+      area(), 
+      health(6),
+      origin("center"),
+      z(2),
+      {
+        immunity: false,
+      },
+    ]);
+    player.play("run");
+    //Player HP
+     let Hp = add([{ value: 6 }]);
+    player.onCollide("alien", (a) => {
+      if (player.immunity == false) {
+        player.hurt(1);
+        destroy(a);
+      }
+    });
+     player.onCollide("bomb", (b) => {
+      if (player.immunity == false) {
+        player.hurt(1);
+        destroy(b);
+      }
+    });
+       onCollide("laser", "alien", (l, a) => {
+    a.hurt(5);
+    destroy(l);
+  });
+    //Player damage
+    player.on("hurt", () => {
+      Hp.value -= 1;
+      add([
+        sprite("Fireball", { anim: "run" }),
+        lifespan(0.5, { fade: 0.18 }),
+        pos(player.pos.x - 60, player.pos.y - 50),
+        z(3),
+      ]);
+      if (SCanbeHeard.value % 2 == 0) {
+        play("Explosion", {
+          volume: 0.6,
+        });
+      }
+      if (Hp.value == 5) {
+        Hearts.play("run1");
+      } else if (Hp.value == 4) {
+        Hearts.play("run2");
+      } else if (Hp.value == 3) {
+        Hearts.play("run3");
+      } else if (Hp.value == 2) {
+        Hearts.play("run4");
+      } else if (Hp.value == 1) {
+        Hearts.play("run5");
+      } else if (Hp.value == 0) {
+        Hearts.play("run6");
+      }
+      player.immunity = true;
+      wait(1, () => {
+        player.immunity = false;
+        player.hidden = false;
+      });
+    });
+    player.on("death", () => {
+      destroy(player);
+      shake();
+      wait(0.5, () => {
+        go("Lose");
+      });
+    });
+    //Player immunity
+    //Player laser
+    function laser() {
+      onKeyPress("space", () => {
+        if (SCanbeHeard.value % 2 == 0) {
+          play("Shooting", {
+            volume: 0.7,
+          });
+        }
+        add([
+          "laser",
+          sprite("Laser"),
+          scale(0.32, 0.32),
+          color(255, 0, 255),
+          area(),
+          pos(player.pos.x - 10, player.pos.y),
+          move(UP, 1200),
+          cleanup(),
+          z(2),
+        ]);
+      });
+    }
+    laser();
+    //Player movement
+    const SPEED = 350;
+    onKeyDown("up", () => {
+      if (player.pos.y > 0 + 28) {
+        player.move(0, -SPEED);
+      }
+    });
+    onKeyDown("right", () => {
+      if (player.pos.x < width() - 30) {
+        player.move(SPEED, 0);
+      }
+    });
+    onKeyDown("left", () => {
+      if (player.pos.x > 0 + 30) {
+        player.move(-SPEED, 0);
+      }
+    });
+
+    onKeyDown("down", () => {
+      if (player.pos.y < height() - 28) {
+        player.move(0, SPEED);
+      }
+    });
+   
+       let bosshealth = 200
+       
+       const boss = add([
+		sprite("Alien enemy",{
+               anim: "run"
+               }),
+		area(),
+		pos(width() / 100, 60),
+		health(bosshealth),
+         z(3),
+		scale(4),
+		"alien",
+	])
+      add([
+      "col-left",
+      // rect(10, height()),
+      // outline(),
+      area({ width: 0, height: height() }),
+      pos(-10, 0),
+    ]);
+
+    add([
+      "col-right",
+      // rect(width(), height()),
+      // outline(),
+      area({ width: width(), height: height() }),
+      pos(width() + 10, 0),
+    ]);
+ 
+    var dir = 6;
+    var didLeft = true;
+    var y = 20;
+    onUpdate("alien", (alien) => {
+      alien.pos.x += dir;
+    });
+    
+    onCollide("col-left", "alien", () => {
+      if (!didLeft) {
+        dir = -dir;
+        every("alien", (e) => (e.pos.y += y));
+        didLeft = true;
+      }
+    });
+
+    onCollide("col-right", "alien", () => {
+      if (didLeft) {
+        dir = -dir;
+        every("alien", (e) => (e.pos.y += y));
+        didLeft = false;
+      }
+    });
+       
+       if(Difficultymode.value % 2 == 0) {
+       onUpdate("alien", (a) => {
+      if (Math.random() < 0.04) {
+        const bPos = a.pos.add(0, a.height / 2);
+        add([
+          color(189, 183, 107),
+          "bomb",
+          pos(bPos),
+          sprite("Bomb"),
+          scale(1.5, 1),
+          area(),
+          move(DOWN, 525),
+          cleanup(),
+          z(2),
+        ]);
+      }
+    })
+       }
+       if(Difficultymode.value % 2 == 1) {
+       onUpdate("alien", (a) => {
+      if (Math.random() < 0.06) {
+        const bPos = a.pos.add(0, a.height / 2);
+        add([
+          color(189, 183, 107),
+          "bomb",
+          pos(bPos),
+          sprite("Bomb"),
+          scale(1.5, 1),
+          area(),
+          move(DOWN, 525),
+          cleanup(),
+          z(2),
+        ]);
+      }
+    })
+       }
+	boss.onHurt(() => {
+		healthbar.set(boss.hp())
+	})
+
+	boss.onDeath(() => {
+		go("Win")
+	})
+	const healthbar = add([
+		rect(width(), 40),
+		pos(0, 0),
+		color(127, 255, 127),
+      z(3),
+		{
+			max: bosshealth,
+			set(hp) {
+				this.width = width() * hp / this.max
+				this.flash = true
+			},
+		},
+	])
+	healthbar.onUpdate(() => {
+		if (healthbar.flash) {
+			healthbar.color = rgb(255, 255, 255)
+			healthbar.flash = false
+		} else {
+			healthbar.color = rgb(127, 255, 127)
+		}
+	})
+      if(Difficultymode.value % 2 == 1) {
+        bosshealth += 200
+        dir += 2
+        }
+})
     go("Menu");
   }); //Closing onload
