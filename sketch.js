@@ -77,9 +77,9 @@ loadSprite("shield", "SpriteSheets/SpaceShooterAssetPack_Miscellaneous.png", {
   sliceY: 4,
   anims: {
     run: {
-      from: 16,
-      to: 17,
-      speed: 2,
+      from: 17,
+      to: 15,
+      speed: 2.5,
       loop: true,
     },
   },
@@ -105,9 +105,9 @@ loadSprite("characters","SpriteSheets/SpaceShooterAssetPack_Characters (1).png",
         speed: 3,
       },
       aliencom: {
-        from: 15,
-        to: 18,
-        speed: 7,
+        from: 30,
+        to: 34,
+        speed: 0.9,
       },
     },
   }
@@ -235,6 +235,18 @@ onLoad(() => {
       z(2),
     ]);
     add([
+      sprite("textbox", { anim: "run" }),
+      scale(1),
+      pos(900, 850),
+      z(1),
+    ]);
+    add([
+      sprite("characters", { anim: "aliencom" }),
+      scale(13),
+      pos(920, 880),
+      z(3),
+    ]);
+    add([
       text("Space Invaders", {
         font: "KH",
         size: 180,
@@ -327,38 +339,8 @@ onLoad(() => {
         });
       }
     });
-    /*
-    //Dialogue
-    add([
-      sprite("characters", { anim: "allycom" }),
-      scale(15),
-      pos(width() / 2.2, height() / 20),
-      z(3),
-    ]);
-    add([
-      sprite("textbox", { anim: "run" }),
-      scale(1.5),
-      pos(width() / 2.4, height() / 1500),
-      z(2),
-    ]);
-    onDraw(() => {
-      add([
-        drawTriangle({
-          p1: vec2(190, 190),
-          p2: vec2(180, 215),
-          p3: vec2(200, 215),
-          pos: vec2(width() / 0.92, height() / 2.8),
-          color: rgb(0, 0, 255),
-          outline: { width: 2, color: rgb(0, 0, 0) },
-          angle: 180,
-        }),
-        z(4),
-      ]);
-    });
-    */
   });
-  
-  
+
 //Settings
   scene("Settingsmenu", () => {
     add([sprite("SpaceBackGround"), scale(0.5), z(1)]);
@@ -751,45 +733,71 @@ onLoad(() => {
       }
     });
     //Player damage
-    player.on("hurt", () => {
-      Hp.value -= 1;
-      add([
-        sprite("Fireball", { anim: "run" }),
-        lifespan(0.5, { fade: 0.18 }),
-        pos(player.pos.x - 60, player.pos.y - 50),
+      player.on("hurt", () => {
+    Hp.value -= 1;
+    add([
+      sprite("Fireball", { anim: "run" }),
+      lifespan(0.5, { fade: 0.18 }),
+      pos(player.pos.x - 60, player.pos.y - 50),
+      z(3),
+    ]);
+    
+    if (SCanbeHeard.value % 2 == 0) {
+      play("Explosion", {
+        volume: 0.6,
+      });
+    }
+    
+    if (Hp.value == 5) {
+      Hearts.play("run1");
+    } else if (Hp.value == 4) {
+      Hearts.play("run2");
+    } else if (Hp.value == 3) {
+      Hearts.play("run3");
+    } else if (Hp.value == 2) {
+      Hearts.play("run4");
+    } else if (Hp.value == 1) {
+      Hearts.play("run5");
+    } else if (Hp.value == 0) {
+      Hearts.play("run6");
+    }
+    
+    player.immunity = true;
+    
+    if (player.immunity === true && Hp.value > 0) {
+      const shield = add([
+        sprite("shield", { anim: "run" }),
+        lifespan(1, { fade: 0.18 }),
+        scale(7, 6),
+        pos(player.pos.x - 70, player.pos.y - 40),
         z(3),
+        {
+          target: player,
+          offset: vec2(-70, -40),
+        }
       ]);
-      if (SCanbeHeard.value % 2 == 0) {
-        play("Explosion", {
-          volume: 0.6,
-        });
-      }
-      if (Hp.value == 5) {
-        Hearts.play("run1");
-      } else if (Hp.value == 4) {
-        Hearts.play("run2");
-      } else if (Hp.value == 3) {
-        Hearts.play("run3");
-      } else if (Hp.value == 2) {
-        Hearts.play("run4");
-      } else if (Hp.value == 1) {
-        Hearts.play("run5");
-      } else if (Hp.value == 0) {
-        Hearts.play("run6");
-      }
-      player.immunity = true;
-      wait(1, () => {
-        player.immunity = false;
-        player.hidden = false;
+      
+      shield.onUpdate(() => {
+        if (shield.target) {
+          shield.pos.x = shield.target.pos.x + shield.offset.x;
+          shield.pos.y = shield.target.pos.y + shield.offset.y;
+        }
       });
+    }
+    
+    wait(1, () => {
+      player.immunity = false;
+      player.hidden = false;
     });
-    player.on("death", () => {
-      destroy(player);
-      shake();
-      wait(0.5, () => {
-        go("Lose");
-      });
+  });
+  player.on("death", () => {
+    destroy(player);
+    shake();
+    wait(0.5, () => {
+      go("Lose");
     });
+  });
+
     //Player immunity
     //Player laser
     function laser() {
@@ -1013,9 +1021,14 @@ onLoad(() => {
     //Player HP
      let Hp = add([{ value: 6 }]);
     player.onCollide("alien", (a) => {
-      if (player.immunity == false) {
+      if (player.immunity == false && !a.is("boss")) {
         player.hurt(1);
         destroy(a);
+      }
+    });
+    player.onCollide("boss", (b) => {
+      if (player.immunity == false) {
+        player.hurt(1);
       }
     });
      player.onCollide("bomb", (b) => {
@@ -1030,44 +1043,69 @@ onLoad(() => {
   });
     //Player damage
     player.on("hurt", () => {
-      Hp.value -= 1;
-      add([
-        sprite("Fireball", { anim: "run" }),
-        lifespan(0.5, { fade: 0.18 }),
-        pos(player.pos.x - 60, player.pos.y - 50),
+    Hp.value -= 1;
+    add([
+      sprite("Fireball", { anim: "run" }),
+      lifespan(0.5, { fade: 0.18 }),
+      pos(player.pos.x - 60, player.pos.y - 50),
+      z(3),
+    ]);
+    
+    if (SCanbeHeard.value % 2 == 0) {
+      play("Explosion", {
+        volume: 0.6,
+      });
+    }
+    
+    if (Hp.value == 5) {
+      Hearts.play("run1");
+    } else if (Hp.value == 4) {
+      Hearts.play("run2");
+    } else if (Hp.value == 3) {
+      Hearts.play("run3");
+    } else if (Hp.value == 2) {
+      Hearts.play("run4");
+    } else if (Hp.value == 1) {
+      Hearts.play("run5");
+    } else if (Hp.value == 0) {
+      Hearts.play("run6");
+    }
+    
+    player.immunity = true;
+    
+    if (player.immunity === true && Hp.value > 0) {
+      const shield = add([
+        sprite("shield", { anim: "run" }),
+        lifespan(1, { fade: 0.18 }),
+        scale(7, 6),
+        pos(player.pos.x - 70, player.pos.y - 40),
         z(3),
+        {
+          target: player,
+          offset: vec2(-70, -40),
+        }
       ]);
-      if (SCanbeHeard.value % 2 == 0) {
-        play("Explosion", {
-          volume: 0.6,
-        });
-      }
-      if (Hp.value == 5) {
-        Hearts.play("run1");
-      } else if (Hp.value == 4) {
-        Hearts.play("run2");
-      } else if (Hp.value == 3) {
-        Hearts.play("run3");
-      } else if (Hp.value == 2) {
-        Hearts.play("run4");
-      } else if (Hp.value == 1) {
-        Hearts.play("run5");
-      } else if (Hp.value == 0) {
-        Hearts.play("run6");
-      }
-      player.immunity = true;
-      wait(1, () => {
-        player.immunity = false;
-        player.hidden = false;
+      
+      shield.onUpdate(() => {
+        if (shield.target) {
+          shield.pos.x = shield.target.pos.x + shield.offset.x;
+          shield.pos.y = shield.target.pos.y + shield.offset.y;
+        }
       });
+    }
+    
+    wait(1, () => {
+      player.immunity = false;
+      player.hidden = false;
     });
-    player.on("death", () => {
-      destroy(player);
-      shake();
-      wait(0.5, () => {
-        go("Lose");
-      });
+  });
+  player.on("death", () => {
+    destroy(player);
+    shake();
+    wait(0.5, () => {
+      go("Lose");
     });
+  });
     //Player immunity
     //Player laser
     function laser() {
@@ -1127,6 +1165,7 @@ onLoad(() => {
          z(3),
 		scale(4),
 		"alien",
+    "boss",
 	])
       add([
       "col-left",
